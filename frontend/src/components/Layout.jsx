@@ -1,6 +1,6 @@
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { LogOut, Ticket } from 'lucide-react';
+import { LogOut, Ticket, Calendar, Building2, ShoppingCart, Package } from 'lucide-react';
 
 export default function Layout() {
   const { user, logout } = useAuthStore();
@@ -11,9 +11,29 @@ export default function Layout() {
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Ticket className="h-8 w-8 text-indigo-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">TicketForge</span>
+            <div className="flex items-center gap-6">
+              <Link to="/dashboard" className="flex items-center">
+                <Ticket className="h-8 w-8 text-indigo-600" />
+                <span className="ml-2 text-xl font-bold text-gray-900">TicketForge</span>
+              </Link>
+              <Link to="/events" className="flex items-center text-sm text-gray-600 hover:text-indigo-600">
+                <Calendar className="h-4 w-4 mr-1" /> Browse
+              </Link>
+              {user?.role === 'organizer' && (
+                <Link to="/organizer/dashboard" className="flex items-center text-sm text-gray-600 hover:text-indigo-600">
+                  <Building2 className="h-4 w-4 mr-1" /> Organizer
+                </Link>
+              )}
+              {user && (
+                <>
+                  <Link to="/cart" className="flex items-center text-sm text-gray-600 hover:text-indigo-600">
+                    <ShoppingCart className="h-4 w-4 mr-1" /> Cart
+                  </Link>
+                  <Link to="/orders" className="flex items-center text-sm text-gray-600 hover:text-indigo-600">
+                    <Package className="h-4 w-4 mr-1" /> Orders
+                  </Link>
+                </>
+              )}
             </div>
             <div className="flex items-center gap-4">
               {user && (
