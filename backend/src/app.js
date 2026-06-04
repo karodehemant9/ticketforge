@@ -8,6 +8,7 @@ import healthRoutes from './modules/health/health.routes.js';
 import venueRoutes from './modules/venues/venue.routes.js';
 import eventRoutes from './modules/events/event.routes.js';
 import bookingRoutes from './modules/bookings/booking.routes.js';
+import sseRoutes from './modules/saga/sse.routes.js';
 import { errorHandler } from './utils/errorHandler.js';
 import { ApiError } from './utils/ApiError.js';
 
@@ -36,9 +37,8 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Stricter rate limit for booking endpoints (flash sale protection)
 const bookingLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
+  windowMs: 60 * 1000,
   max: 10,
   message: { success: false, error: { code: 'RATE_LIMITED', message: 'Booking too fast. Slow down.' } },
 });
@@ -58,6 +58,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/venues', venueRoutes);
 app.use('/api/v1/events', eventRoutes);
 app.use('/api/v1/bookings', bookingRoutes);
+app.use('/api/v1/sse', sseRoutes);
 
 app.use((req, res, next) => {
   next(ApiError.notFound(`Route ${req.originalUrl} not found`, 'ROUTE_NOT_FOUND'));

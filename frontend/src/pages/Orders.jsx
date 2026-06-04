@@ -1,24 +1,43 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
-import { Package, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Package, CheckCircle, Clock, XCircle, Loader, CreditCard } from 'lucide-react';
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/bookings/orders').then(res => {
-      setOrders(res.data.data);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    fetchOrders();
   }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const res = await api.get('/bookings/orders');
+      setOrders(res.data.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusIcon = (status) => {
     switch (status) {
       case 'completed': return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case 'reserved': return <Clock className="h-5 w-5 text-yellow-600" />;
+      case 'reserved': return <Loader className="h-5 w-5 text-yellow-600 animate-spin" />;
+      case 'payment_initiated': return <CreditCard className="h-5 w-5 text-blue-600 animate-pulse" />;
       case 'cancelled': return <XCircle className="h-5 w-5 text-red-600" />;
-      default: return <Package className="h-5 w-5 text-gray-600" />;
+      default: return <Clock className="h-5 w-5 text-gray-600" />;
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'completed': return 'Payment Complete';
+      case 'reserved': return 'Processing Payment...';
+      case 'payment_initiated': return 'Payment in Progress...';
+      case 'cancelled': return 'Payment Failed';
+      default: return status;
     }
   };
 
@@ -43,12 +62,15 @@ export default function Orders() {
               </div>
               <div className="flex items-center gap-2">
                 {getStatusIcon(order.status)}
-                <span className="text-sm font-medium capitalize">{order.status}</span>
+                <span className="text-sm font-medium capitalize">{getStatusText(order.status)}</span>
               </div>
             </div>
           ))}
         </div>
       )}
+      <p className="text-xs text-gray-500 mt-4 text-center">
+        Orders auto-process via Kafka. Refresh to see status updates.
+      </p>
     </div>
   );
 }

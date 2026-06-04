@@ -1,5 +1,6 @@
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import * as bookingService from './booking.service.js';
+import { sendBookingEvent } from '../../config/kafka.js';
 import { ApiError } from '../../utils/ApiError.js';
 
 export const getAvailability = asyncHandler(async (req, res) => {
@@ -26,10 +27,19 @@ export const removeFromCart = asyncHandler(async (req, res) => {
 export const checkout = asyncHandler(async (req, res) => {
   const { idempotencyKey } = req.body;
   const result = await bookingService.createOrder(req.user.userId, idempotencyKey);
+  
+  // Emit Kafka event to start saga
+  await sendBookingEvent('order.created', {
+    orderId: result.orderId,
+    userId: req.user.userId,
+    totalAmount: result.totalAmount,
+    createdAt: new Date().toISOString(),
+  });
+
   res.status(result.isDuplicate ? 200 : 201).json({
     success: true,
     data: result,
-    message: result.isDuplicate ? 'Order already processed' : 'Order reserved successfully',
+    message: result.isDuplicate ? 'Order already processed' : 'Order reserved. Payment processing...',
   });
 });
 

@@ -15,6 +15,8 @@ const env = {
   JWT_EXPIRY: process.env.JWT_EXPIRY || '15m',
   JWT_REFRESH_EXPIRY: process.env.JWT_REFRESH_EXPIRY || '7d',
   BCRYPT_ROUNDS: parseInt(process.env.BCRYPT_ROUNDS || '12'),
+  KAFKA_BROKERS: process.env.KAFKA_BROKERS || 'localhost:9092',
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
 };
 
 export default env;

@@ -1,30 +1,46 @@
 import app from './app.js';
 import env from './config/env.js';
 import logger from './utils/logger.js';
+import { connectKafka } from './config/kafka.js';
+import { startBookingConsumer } from './modules/saga/booking.saga.js';
 
-const server = app.listen(env.PORT, () => {
-  logger.info(`TicketForge running on port ${env.PORT} in ${env.NODE_ENV} mode`);
-});
+const startServer = async () => {
+  try {
+    await connectKafka();
+    await startBookingConsumer();
+    logger.info('Kafka fully connected - producer + consumer ready');
+  } catch (err) {
+    logger.error('Kafka setup failed:', err.message);
+    logger.error('Booking saga will not auto-process orders. Check Kafka container.');
+    // Don't exit - let the app run without Kafka for now
+  }
 
-const shutdown = (signal) => {
-  logger.info(`${signal} received. Shutting down gracefully...`);
-  server.close(() => {
-    logger.info('HTTP server closed');
-    process.exit(0);
+  const server = app.listen(env.PORT, () => {
+    logger.info(`TicketForge running on port ${env.PORT} in ${env.NODE_ENV} mode`);
   });
-  setTimeout(() => {
-    logger.error('Forced shutdown');
-    process.exit(1);
-  }, 10000);
+
+  const shutdown = (signal) => {
+    logger.info(`${signal} received. Shutting down gracefully...`);
+    server.close(() => {
+      logger.info('HTTP server closed');
+      process.exit(0);
+    });
+    setTimeout(() => {
+      logger.error('Forced shutdown');
+      process.exit(1);
+    }, 10000);
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('uncaughtException', (err) => {
+    logger.error('Uncaught Exception:', err);
+    shutdown('UNCAUGHT_EXCEPTION');
+  });
+  process.on('unhandledRejection', (reason) => {
+    logger.error('Unhandled Rejection:', reason);
+    shutdown('UNHANDLED_REJECTION');
+  });
 };
 
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
-process.on('uncaughtException', (err) => {
-  logger.error('Uncaught Exception:', err);
-  shutdown('UNCAUGHT_EXCEPTION');
-});
-process.on('unhandledRejection', (reason) => {
-  logger.error('Unhandled Rejection:', reason);
-  shutdown('UNHANDLED_REJECTION');
-});
+startServer();
