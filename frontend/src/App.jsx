@@ -9,6 +9,7 @@ import Events from './pages/Events';
 import EventDetail from './pages/EventDetail';
 import Cart from './pages/Cart';
 import Orders from './pages/Orders';
+import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const queryClient = new QueryClient({
@@ -30,6 +31,7 @@ export default function App() {
             <Route path="organizer/dashboard" element={<ProtectedRoute><OrganizerDashboard /></ProtectedRoute>} />
             <Route path="cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
             <Route path="orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+            <Route path="admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           </Route>
         </Routes>
       </BrowserRouter>

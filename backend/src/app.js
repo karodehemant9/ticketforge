@@ -9,6 +9,8 @@ import venueRoutes from './modules/venues/venue.routes.js';
 import eventRoutes from './modules/events/event.routes.js';
 import bookingRoutes from './modules/bookings/booking.routes.js';
 import sseRoutes from './modules/saga/sse.routes.js';
+import adminRoutes from './modules/admin/admin.routes.js';
+import csvRoutes from './modules/admin/csv.routes.js';
 import { errorHandler } from './utils/errorHandler.js';
 import { ApiError } from './utils/ApiError.js';
 
@@ -59,6 +61,8 @@ app.use('/api/v1/venues', venueRoutes);
 app.use('/api/v1/events', eventRoutes);
 app.use('/api/v1/bookings', bookingRoutes);
 app.use('/api/v1/sse', sseRoutes);
+app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/admin/csv', csvRoutes);
 
 app.use((req, res, next) => {
   next(ApiError.notFound(`Route ${req.originalUrl} not found`, 'ROUTE_NOT_FOUND'));

@@ -1,6 +1,6 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { LogOut, Ticket, Calendar, Building2, ShoppingCart, Package } from 'lucide-react';
+import { LogOut, Ticket, Calendar, Building2, ShoppingCart, Package, BarChart3 } from 'lucide-react';
 
 export default function Layout() {
   const { user, logout } = useAuthStore();
@@ -22,6 +22,11 @@ export default function Layout() {
               {user?.role === 'organizer' && (
                 <Link to="/organizer/dashboard" className="flex items-center text-sm text-gray-600 hover:text-indigo-600">
                   <Building2 className="h-4 w-4 mr-1" /> Organizer
+                </Link>
+              )}
+              {user?.role === 'admin' && (
+                <Link to="/admin" className="flex items-center text-sm text-gray-600 hover:text-indigo-600">
+                  <BarChart3 className="h-4 w-4 mr-1" /> Admin
                 </Link>
               )}
               {user && (
